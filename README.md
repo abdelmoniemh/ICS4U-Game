@@ -1,2 +1,2 @@
 # ICS4U-Game
-treasure hunter
+Treasure Hunter

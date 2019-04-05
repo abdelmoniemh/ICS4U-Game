@@ -15,7 +15,6 @@ class Player(pg.sprite.Sprite):
         self.change_y = 0
         self.change_x = 0
 
-
     def update(self):
         self.calc_grav()
 
@@ -43,6 +42,47 @@ class Player(pg.sprite.Sprite):
                 self.rect.top = block.rect.bottom
 
             self.change_y = 0
+
+
+
+
+
+
+
+
+
+
+
+        skull_hit_list = pg.sprite.spritecollide(self, self.game.skulls, False)
+        for skl in skull_hit_list:
+
+            if self.change_x > 0:
+                self.rect.right = skl.rect.left
+                self.health -= 1
+            elif self.change_x < 0:
+                self.rect.left = skl.rect.right
+                self.health -= 1
+
+        self.rect.y += self.change_y
+
+        skull_hit_list = pg.sprite.spritecollide(self, self.game.skulls, False)
+        for skl in skull_hit_list:
+
+            if self.change_y > 0:
+                self.rect.bottom = skl.rect.top
+                self.health -= 1
+
+            elif self.change_y < 0:
+                self.rect.top = skl.rect.bottom
+                self.health -= 1
+            self.change_y = 0
+
+
+
+
+
+
+
 
     def calc_grav(self):
 

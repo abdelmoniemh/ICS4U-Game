@@ -17,6 +17,7 @@ class Game:
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         self.load_data()
+        pg.font.init()
 
     def load_data(self):
         game_folder = os.path.dirname(__file__)
@@ -30,23 +31,31 @@ class Game:
         #new game
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
+        self.endgametile = pg.sprite.Group()
         self.skulls = pg.sprite.Group()
         self.enemy_list = pg.sprite.Group()
         #self.skully = Skull(self)
         self.Esteban = Player(self)
         self.all_sprites.add(self.Esteban)
 
-
+        #read text file give every element an x, y based on col and row in file
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
-                    np =  Platform(self, col, row)
+                    np =  Platform(col, row)
                     self.all_sprites.add(np)
                     PLATFORM_LIST.append(np)
+                    self.platforms.add(np)
                 if tile == "s":
                     skl = Skull(col, row)
                     self.all_sprites.add(skl)
                     self.skulls.add(skl)
+                if tile == "e":
+                    end = endtile(col, row)
+                    self.all_sprites.add(end)
+                    self.endgametile.add(end)
+
+
 
         self.run()
 
@@ -70,27 +79,23 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
-
-
             if event.type == pg.KEYDOWN:
-                if event.key == pg.K_LEFT:
+                if event.key == pg.K_LEFT or event.key == pg.K_a:
                     self.Esteban.go_left()
-                if event.key == pg.K_RIGHT is False:
-                    self.Esteban.change_x = 6
-                if event.key == pg.K_RIGHT:
+
+                if event.key == pg.K_RIGHT or event.key == pg.K_d:
                     self.Esteban.go_right()
 
-
-                if event.key == pg.K_UP:
+                if event.key == pg.K_UP or  event.key == pg.K_SPACE:
                     self.Esteban.jump()
-
             if event.type == pg.KEYUP:
-                if event.key == pg.K_LEFT and self.Esteban.change_x < 0:
+                if event.key == pg.K_LEFT or event.key == pg.K_a and self.Esteban.change_x < 0:
                     self.Esteban.stop()
-                if event.key == pg.K_RIGHT and self.Esteban.change_x > 0:
+                if event.key == pg.K_RIGHT or event.key == pg.K_d and self.Esteban.change_x > 0:
                     self.Esteban.stop()
+
         if self.Esteban.health <= 0:
-            print("esteban died")
+            print("Oh, dios mio Esteban died")
             if self.playing:
                 self.playing = False
             self.running = False
@@ -105,19 +110,29 @@ class Game:
         for enemy in self.enemy_list:
             enemy.rect.x += shift_x
 
-
-
     def update(self):
         #game loop - update
         self.all_sprites.update()
         self.enemy_list.update()
-        burn = pg.sprite.spritecollide(self.Esteban, self.skulls, False)
-        if burn:
-            self.Esteban.pos.y = burn[0].rect.top + 1
-            self.Esteban.vel.y = 0
-            self.Esteban.health -= 1
 
+        if self.Esteban.rect.right >= WIDTH/5:
+            self.Esteban.rect.right = WIDTH/5
+        if self.Esteban.rect.right <= WIDTH/8:
+             self.Esteban.rect.right = WIDTH/8
 
+        if self.Esteban.change_x > 0:
+            self.Esteban.pos += -1.2*(self.Esteban.change_x)
+            for plat in self.platforms:
+                plat.rect.x += -1.2*(self.Esteban.change_x)
+            for skl in self.skulls:
+                skl.rect.x += -1.2*(self.Esteban.change_x)
+            for end in self.endgametile:
+                end.rect.x += -1.2 * (self.Esteban.change_x)
+        ends = pg.sprite.spritecollide(self.Esteban, self.endgametile, False)
+        if ends:
+            if self.playing:
+                self.playing = False
+            self.running = False
 
 
 
@@ -129,6 +144,9 @@ class Game:
         self.enemy_list.draw(self.screen)
         self.all_sprites.draw(self.screen)
         self.platforms.draw(self.screen)
+        self.myfont = pg.font.SysFont('Comic Sans MS', 20)
+        self.textsurface = self.myfont.render('Health: '+ (str(self.Esteban.health)), False, (WHITE))
+        self.screen.blit(self.textsurface, (WIDTH/8, HEIGHT-600))
         # last line in loop (AFTER DRAWING EVERYTHING)
         pg.display.flip()
 
@@ -145,7 +163,5 @@ g.show_start_screen()
 while g.running:
     g.new()
     g.show_go_screen()
-
-
 
 pg.quit()

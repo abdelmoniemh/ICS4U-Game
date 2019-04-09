@@ -27,10 +27,9 @@ bg = pg.image.load(os.path.join(game_folder, 'templewip1.png'))
 plt = pg.image.load(os.path.join(game_folder, 'platform-1.png'))
 
 #player properties
-PLAYER_ACC = 0.5
-PLAYER_FRICTION = -0.13
 PLAYER_GRAVITY = 0.7
 JUMP = -10
+PLAYER_SPEED = 6
 
 #platfroms
 PLATFORM_LIST = [(0, HEIGHT - 40),
@@ -39,7 +38,7 @@ PLATFORM_LIST = [(0, HEIGHT - 40),
                  (600, HEIGHT *0.75)]
 
 #skulls
-SKULL_LIST = [(300 , 550)]
+SKULL_LIST = [(300, 550)]
 
 
 TILESIZE = 32

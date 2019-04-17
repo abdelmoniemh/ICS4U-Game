@@ -1,0 +1,332 @@
+#EstebanEscapes
+from settings import *
+import pygame as pg
+from os import path
+import os
+from sp2 import *
+import math
+
+
+class Game:
+
+    def __init__(self):
+        #init game window etc
+        self.running = True # set the while loop to true
+        pg.font.init() # allows for text to be printed onscreen
+        pg.mixer.init() # init sound
+        pg.init() #initilazie pygame
+        self.screen = pg.display.set_mode((WIDTH, HEIGHT)) # set the display size
+        pg.display.set_caption(TITLE) # set the name of the game
+        self.clock = pg.time.Clock() #set fps
+        self.load_data() #runs a function that reads the map file
+
+
+    def load_data(self):
+        game_folder = os.path.dirname(__file__) # sets a path to the same folder as the code
+        self.map_data = [] # creates an empty list to add the contents of a text file
+        with open(path.join(game_folder, 'map.txt'), 'rt') as f: # opens path to map file as a readable
+            for line in f: # adds everything in the map file to the list self.map_data
+                self.map_data.append(line)
+
+    def new(self):
+
+        # new game -  creates various sprite groups and instances of classes such as platforms
+        # some values that need to be defined at the beginning of the game
+        self.all_sprites = pg.sprite.Group()
+        self.platforms = pg.sprite.Group()
+        self.endgametile = pg.sprite.Group()
+        self.skulls = pg.sprite.Group()
+        self.enemy_list = pg.sprite.Group()
+        #self.skully = Skull(self)
+        self.Esteban = Player(self)
+        self.all_sprites.add(self.Esteban)
+        self.momentum = 0
+
+        #read text file give every element an x, y based on col and row in file
+        for row, tiles in enumerate(self.map_data):
+            for col, tile in enumerate(tiles):
+                if tile == '1':
+                    np =  Platform(col, row)
+                    self.all_sprites.add(np)
+                    PLATFORM_LIST.append(np)
+                    self.platforms.add(np)
+                if tile == 'u':
+                    np = Platform(col, row)
+                    np.image = pg.image.load(os.path.join(game_folder, 'images/tl.png'))
+                    self.all_sprites.add(np)
+                    PLATFORM_LIST.append(np)
+                    self.platforms.add(np)
+                if tile == 'i':
+                    np = Platform(col, row)
+                    np.image = pg.image.load(os.path.join(game_folder, 'images/mt.png'))
+                    self.all_sprites.add(np)
+                    PLATFORM_LIST.append(np)
+                    self.platforms.add(np)
+                if tile == 'o':
+                    np = Platform(col, row)
+                    np.image = pg.image.load(os.path.join(game_folder, 'images/tr.png'))
+                    self.all_sprites.add(np)
+                    PLATFORM_LIST.append(np)
+                    self.platforms.add(np)
+                if tile == 'j':
+                    np = Platform(col, row)
+                    np.image = pg.image.load(os.path.join(game_folder, 'images/ml.png'))
+                    self.all_sprites.add(np)
+                    PLATFORM_LIST.append(np)
+                    self.platforms.add(np)
+                if tile == 'k':
+                    np = Platform(col, row)
+                    np.image = pg.image.load(os.path.join(game_folder, 'images/m.png'))
+                    self.all_sprites.add(np)
+                    PLATFORM_LIST.append(np)
+                    self.platforms.add(np)
+                if tile == 'l':
+                    np = Platform(col, row)
+                    np.image = pg.image.load(os.path.join(game_folder, 'images/mr.png'))
+                    self.all_sprites.add(np)
+                    PLATFORM_LIST.append(np)
+                    self.platforms.add(np)
+                if tile == "s":
+                    skl = Skull(col, row)
+                    self.all_sprites.add(skl)
+                    self.skulls.add(skl)
+                if tile == "e":
+                    end = endtile(col, row)
+                    self.all_sprites.add(end)
+                    self.endgametile.add(end)
+                #each character in the text file relates to a instance of a class and this is basically where the map is created
+                #from the map
+
+        self.run()
+
+    def run(self):
+
+        #game loop - calls all the functions in the order they run in in the game loop
+        self.playing = True
+        self.espinCount = 0
+        while self.playing:
+            #self.momentum += 0.005 code that is wip for acceleration
+            self.clock.tick(FPS)
+            self.events()
+            self.update()
+            self.draw()
+            if self.Esteban.change_x == 0:
+                self.Esteban.image = pg.image.load(
+                    os.path.join(game_folder, 'images/Esteban/' + str(round(0)) + '.png')).convert()
+                self.Esteban.image.set_colorkey(BLACK)
+            else:
+                self.Esteban.image = pg.image.load(os.path.join(game_folder, 'images/Esteban/' + str(round(self.espinCount)) + '.png')).convert()
+                self.Esteban.image.set_colorkey(BLACK)
+                self.espinCount += 0.25
+                if self.espinCount == 7:
+                    self.espinCount = 0
+                # last line in loop (AFTER DRAWING EVERYTHING)
+            pg.display.flip()
+
+    def events(self):
+
+        #game loop - events
+        for event in pg.event.get():
+            # check for closing window
+            if event.type == pg.QUIT:
+                if self.playing:
+                    self.playing = False
+                self.running = False
+            if event.type == pg.KEYDOWN: # events when a button is pushed down - currently only controls character movement
+                if event.key == pg.K_LEFT or event.key == pg.K_a:
+                    self.Esteban.go_left()
+                if event.key == pg.K_RIGHT or event.key == pg.K_d:
+                    self.Esteban.go_right()
+                    #self.Esteban.change_x += self.momentum code that is wip for acceleration
+                if event.key == pg.K_UP or  event.key == pg.K_SPACE:
+                    self.Esteban.jump()
+            if event.type == pg.KEYUP: # when the button is no longer being pressed
+                if event.key == pg.K_LEFT or event.key == pg.K_a and self.Esteban.change_x < 0:
+                    self.Esteban.stop()
+                if event.key == pg.K_RIGHT or event.key == pg.K_d and self.Esteban.change_x > 0:
+                    #self.Esteban.change_x = PLAYER_SPEED code that is wip for acceleration
+                    #self.momentum = 0 code that is wip for acceleration
+                    self.Esteban.stop()
+
+
+        if self.Esteban.health <= 0: # checkes players health if it is equal to or less than 0
+            print("Oh, dios mio Esteban died")
+            if self.playing:
+                self.playing = False
+            self.running = False
+
+    def update(self):
+        #game loop - update
+        self.all_sprites.update()#updates all sprites in the all sprites group
+        self.enemy_list.update()
+
+        if self.Esteban.rect.right >= WIDTH/5: #Locks player to the left section of the sreen
+            self.Esteban.rect.right = WIDTH/5
+        if self.Esteban.rect.right <= WIDTH/8:
+             self.Esteban.rect.right = WIDTH/8
+
+        if self.Esteban.change_x > 0:
+            self.Esteban.pos += -1.2*(self.Esteban.change_x)# moves the platforms to the left depending the players velocity gives the illusion of movemtent
+            for plat in self.platforms:
+                plat.rect.x += -1.2*(self.Esteban.change_x)
+            for skl in self.skulls:
+                skl.rect.x += -1.2*(self.Esteban.change_x)
+            for end in self.endgametile:
+                end.rect.x += -1.2 * (self.Esteban.change_x)
+        ends = pg.sprite.spritecollide(self.Esteban, self.endgametile, False)# checks for collisions with the last tiles in the level and if it collides closes the game
+        if ends:
+            if self.playing:
+                self.playing = False
+            self.running = False
+
+    def draw(self):
+        #render game
+        self.screen.fill(BLACK)
+        self.screen.blit(bg, (0,-75))# background
+        self.enemy_list.draw(self.screen)#draws sprite group on screen
+        self.all_sprites.draw(self.screen)#draws sprite group on screen
+        self.platforms.draw(self.screen)#draws sprite group on screen
+        self.myfont = pg.font.SysFont('Comic Sans MS', 20)#defines a font that allows for printing on screens
+        self.textsurface = self.myfont.render('Health: '+ (str(self.Esteban.health)), False, (WHITE))# prints players health on screen
+        self.screen.blit(self.textsurface, (WIDTH/8, HEIGHT-600))# prints players health on screen
+        self.textsurface2 = self.myfont.render('Velocity: ' + (str(self.Esteban.change_x)), False, (WHITE))# prints velocity health on screen
+        self.screen.blit(self.textsurface2, (WIDTH - 150, HEIGHT - 600))# prints velocity health on screen
+
+        self.espinP = []
+        for pic in range(8):
+            self.espin = pg.image.load('images/Esteban/' + str(pic) + '.png')
+            self.espinP.append(self.espin)
+
+    def show_start_screen(self):
+        #start screen
+        menuIMG = pg.image.load('MainMenuBackground.png')
+        menuIMG = pg.transform.scale(menuIMG, (800, 608))
+        clearBlack75 = pg.image.load('transpBlack75.png')
+        clearBlack75 = pg.transform.scale(clearBlack75, (800, 200))
+
+        pg.mixer.music.load('Ancient, Desert, Thoughtful Song - Non Copyright, Royalty Free.ogg')
+        pg.mixer.music.set_volume(1)
+        pg.mixer.music.play(-1)
+
+        fontGlobal = 'Arial'
+
+        spinP = []
+
+        for pic in range(32):
+            if pic <= 9:
+                spin = pg.image.load('pyramidSpinIMG/frame_0' + str(pic) + '_delay-0.06s.png')
+            else:
+                spin = pg.image.load('pyramidSpinIMG/frame_' + str(pic) + '_delay-0.06s.png')
+            spin = pg.transform.scale(spin, (210, 160))
+            spinP.append(spin)
+
+        class button():
+            def __init__(self, x, y, font, font_size, text='', boldness=False):
+                self.x = x
+                self.y = y
+                self.text = text
+                self.font = font
+                self.font_size = font_size
+                self.boldness = boldness
+                self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+                pg.font.init()
+
+            def draw(self, win, outline=None):
+                font = pg.font.SysFont(self.font, self.font_size, bold=self.boldness)
+                text = font.render(self.text, 1, (255, 255, 255))
+                if outline:
+                    pg.draw.rect(win, outline, (self.x, self.y, text.get_width(), text.get_height()), 0)
+
+                if self.text != '':
+                    font = pg.font.SysFont(self.font, self.font_size, bold=self.boldness)
+                    text = font.render(self.text, 1, (255, 255, 255))
+                    self.screen.blit(text, (self.x, self.y))
+
+            def isOver(self, pos):
+                font = pg.font.SysFont(self.font, self.font_size, bold=self.boldness)
+                text = font.render(self.text, 1, (255, 255, 255))
+                if pos[0] > self.x and pos[0] < self.x + text.get_width():
+                    if pos[1] > self.y and pos[1] < self.y + text.get_height():
+                        return True
+
+                return False
+
+        def redrawWindow():
+            startButton.draw(self.screen)
+            storeButton.draw(self.screen)
+            optionsButton.draw(self.screen)
+            objectivesButton.draw(self.screen)
+            invButton.draw(self.screen)
+            statsButton.draw(self.screen)
+
+        run = True
+        startButton = button(250, 470, fontGlobal, 18, 'Start Game')
+        storeButton = button(250, 535, fontGlobal, 18, 'Store')
+        optionsButton = button(435, 470, fontGlobal, 18, 'Options')
+        objectivesButton = button(435, 535, fontGlobal, 18, 'Objectives')
+        invButton = button(620, 470, fontGlobal, 18, 'Invite Friends')
+        statsButton = button(620, 535, fontGlobal, 18, 'Stats')
+
+        spinCount = 0
+        while run:
+            self.screen.blit(menuIMG, (0, 0))
+            self.screen.blit(clearBlack75, (0, 445))
+            self.screen.blit(spinP[spinCount], (0, 445))
+            spinCount += 1
+            if spinCount == 32:
+                spinCount = 0
+            redrawWindow()
+            pg.display.update()
+
+            for event in pg.event.get():
+                pos = pg.mouse.get_pos()
+
+                if event.type == pg.QUIT:
+                    run = False
+                    pg.quit()
+                    quit()
+
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if startButton.isOver(pos):
+                        while g.running:  # runs the game loop
+                            g.new()
+                            g.show_go_screen()
+                        run = False
+                    if storeButton.isOver(pos):
+                        print('clicked the store button')
+                    if optionsButton.isOver(pos):
+                        print('clicked the options button')
+                    if objectivesButton.isOver(pos):
+                        print('clicked the objectives button')
+                    if invButton.isOver(pos):
+                        print('clicked the invite friends button')
+                    if statsButton.isOver(pos):
+                        print('clicked the stats button')
+
+                if event.type == pg.MOUSEMOTION:
+                    if startButton.isOver(pos):
+                        startButton.boldness = True
+                    elif storeButton.isOver(pos):
+                        storeButton.boldness = True
+                    elif optionsButton.isOver(pos):
+                        optionsButton.boldness = True
+                    elif objectivesButton.isOver(pos):
+                        objectivesButton.boldness = True
+                    elif invButton.isOver(pos):
+                        invButton.boldness = True
+                    elif statsButton.isOver(pos):
+                        statsButton.boldness = True
+                    else:
+                        startButton.boldness = False
+                        storeButton.boldness = False
+                        optionsButton.boldness = False
+                        objectivesButton.boldness = False
+                        invButton.boldness = False
+                        statsButton.boldness = False
+
+    def show_go_screen(self):
+        #game over screen
+        pass
+
+g = Game()#creates of an instance of the game class
+g.show_start_screen()#shows start screen

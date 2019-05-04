@@ -4,12 +4,12 @@ from pygame.locals import *
 pygame.init()
 FPS = 30
 
-menuIMG = pygame.image.load('MainMenuBackground.png')
+menuIMG = pygame.image.load('MainMenuBackground.png').convert()
 menuIMG = pygame.transform.scale(menuIMG, (800, 600))
-clearBlack75 = pygame.image.load('transpBlack75.png')
+clearBlack75 = pygame.image.load('transpBlack75.png').convert()
 clearBlack75 = pygame.transform.scale(clearBlack75, (800, 200))
 
-pygame.mixer.music.load('Ancient, Desert, Thoughtful Song - Non Copyright, Royalty Free.ogg')
+pygame.mixer.music.load('Ancient, Desert, Thoughtful Song - Non Copyright, Royalty Free.ogg').convert()
 pygame.mixer.music.set_volume(1)
 pygame.mixer.music.play(-1)
 
@@ -19,9 +19,9 @@ spinP=[]
 
 for pic in range(32):
     if pic <= 9:
-        spin = pygame.image.load('pyramidSpinIMG/frame_0'+ str(pic)+ '_delay-0.06s.png')
+        spin = pygame.image.load('pyramidSpinIMG/frame_0'+ str(pic)+ '_delay-0.06s.png').convert()
     else:
-        spin = pygame.image.load('pyramidSpinIMG/frame_' + str(pic) + '_delay-0.06s.png')
+        spin = pygame.image.load('pyramidSpinIMG/frame_' + str(pic) + '_delay-0.06s.png').convert()
     spin = pygame.transform.scale(spin, (210, 160))
     spinP.append(spin)
 

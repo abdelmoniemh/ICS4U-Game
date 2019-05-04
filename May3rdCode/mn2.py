@@ -21,7 +21,7 @@ class Game:
         self.clock = pg.time.Clock()  # set fps
         self.load_data()  # runs a function that reads the map file
 
-    def load_data(self):
+    def load_data(self): #loading the map
         game_folder = os.path.dirname(__file__)  # sets a path to the same folder as the code
         self.map_data = []  # creates an empty list to add the contents of a text file
         with open(path.join(game_folder, 'map.txt'), 'rt') as f:  # opens path to map file as a readable
@@ -241,10 +241,10 @@ class Game:
 
         if self.Esteban.rect.right >= WIDTH / 5:  # Locks player to the left section of the sreen
             self.Esteban.rect.right = WIDTH / 5
-        if self.Esteban.rect.right <= WIDTH / 7:
-            self.Esteban.rect.right = WIDTH / 7
+        if self.Esteban.rect.left <= 0:
+            self.Esteban.rect.left = 0
 
-        if self.Esteban.change_x > 0:
+        if self.Esteban.change_x > 0 or self.Esteban.change_x < 0:
             self.Esteban.pos += -1.2 * (
                 self.Esteban.change_x)  # moves the platforms to the left depending the players velocity gives the illusion of movemtent
             for plat in self.platforms:
@@ -280,20 +280,20 @@ class Game:
 
         self.espinP = []
         for pic in range(8):
-            self.espin = pg.image.load('images/Esteban/' + str(pic) + '.png')
+            self.espin = pg.image.load('images/Esteban/' + str(pic) + '.png').convert()
             self.espinP.append(self.espin)
 
         self.sspinP = []
         for pic in range(5):
-            self.sspin = pg.image.load('images/skull/' + str(pic) + '.png')
+            self.sspin = pg.image.load('images/skull/' + str(pic) + '.png').convert()
             self.sspinP.append(self.sspin)
 
 
     def show_start_screen(self):
         # start screen
-        menuIMG = pg.image.load('MainMenuBackground.png')
+        menuIMG = pg.image.load('MainMenuBackground.png').convert()
         menuIMG = pg.transform.scale(menuIMG, (800, 608))
-        clearBlack75 = pg.image.load('transpBlack75.png')
+        clearBlack75 = pg.image.load('transpBlack75.png').convert_alpha()
         clearBlack75 = pg.transform.scale(clearBlack75, (800, 200))
 
         pg.mixer.music.load('Ancient, Desert, Thoughtful Song - Non Copyright, Royalty Free.ogg')
@@ -306,9 +306,9 @@ class Game:
 
         for pic in range(32):
             if pic <= 9:
-                spin = pg.image.load('pyramidSpinIMG/frame_0' + str(pic) + '_delay-0.06s.png')
+                spin = pg.image.load('pyramidSpinIMG/frame_0' + str(pic) + '_delay-0.06s.png').convert()
             else:
-                spin = pg.image.load('pyramidSpinIMG/frame_' + str(pic) + '_delay-0.06s.png')
+                spin = pg.image.load('pyramidSpinIMG/frame_' + str(pic) + '_delay-0.06s.png').convert()
             spin = pg.transform.scale(spin, (210, 160))
             spinP.append(spin)
 

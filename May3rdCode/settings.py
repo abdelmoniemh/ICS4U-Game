@@ -4,7 +4,7 @@ import pygame as pg
 
 #game options
 TITLE = "Esteban Escapes"
-WIDTH = 1200
+WIDTH = 800
 HEIGHT = 608
 FPS = 60
 
